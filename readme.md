@@ -3,6 +3,37 @@
 Тема: Работа с базами данных в Python с использованием SQLite (DB API 2.0)
 Задание: Реализовать простую библиотечную систему
 
+<figure>
+   <p align="center">Заполнение данными</p>
+   <p align="center">
+      <img src="https://github.com/dr-number/prog-high-level-lang-DB-API-2.0/blob/main/for_read_me/0-seed-data.png">
+   </p>
+</figure>
+<figure>
+   <p align="center">Просмотр всех пользователей</p>
+   <p align="center">
+      <img src="https://github.com/dr-number/prog-high-level-lang-DB-API-2.0/blob/main/for_read_me/0-show-users.png">
+   </p>
+</figure>
+<figure>
+   <p align="center">Нет книг</p>
+   <p align="center">
+      <img src="https://github.com/dr-number/prog-high-level-lang-DB-API-2.0/blob/main/for_read_me/0-no-books.png">
+   </p>
+</figure>
+<figure>
+   <p align="center">Просмотр всех книг</p>
+   <p align="center">
+      <img src="https://github.com/dr-number/prog-high-level-lang-DB-API-2.0/blob/main/for_read_me/0-show-books.png">
+   </p>
+</figure>
+<figure>
+   <p align="center">Ошибка выбора</p>
+   <p align="center">
+      <img src="https://github.com/dr-number/prog-high-level-lang-DB-API-2.0/blob/main/for_read_me/0-error-select.png">
+   </p>
+</figure>
+
 # Create venv:
     python3 -m venv venv
 
