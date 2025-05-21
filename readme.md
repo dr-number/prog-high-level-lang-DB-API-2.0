@@ -41,6 +41,39 @@
    </p>
 </figure>
 
+## Выдача книг
+<figure>
+   <p align="center">Выдача книги пользователю</p>
+   <p align="center">
+      <img src="https://github.com/dr-number/prog-high-level-lang-DB-API-2.0/blob/main/for_read_me/3-borrow_book.png">
+   </p>
+</figure>
+<figure>
+   <p align="center">Книга не найдена</p>
+   <p align="center">
+      <img src="https://github.com/dr-number/prog-high-level-lang-DB-API-2.0/blob/main/for_read_me/3-book-not-found.png">
+   </p>
+</figure>
+<figure>
+   <p align="center">Книга уже выдана</p>
+   <p align="center">
+      <img src="https://github.com/dr-number/prog-high-level-lang-DB-API-2.0/blob/main/for_read_me/3-borrow_book-already_borrow.png">
+   </p>
+</figure>
+<figure>
+   <p align="center">Некорректный выбор пользователя</p>
+   <p align="center">
+      <img src="https://github.com/dr-number/prog-high-level-lang-DB-API-2.0/blob/main/for_read_me/3-error-value-1.png">
+   </p>
+</figure>
+<figure>
+   <p align="center">Некорректный выбор книги</p>
+   <p align="center">
+      <img src="https://github.com/dr-number/prog-high-level-lang-DB-API-2.0/blob/main/for_read_me/3-error-value-2.png">
+   </p>
+</figure>
+
+
 # Create venv:
     python3 -m venv venv
 
