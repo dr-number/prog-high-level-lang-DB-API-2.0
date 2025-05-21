@@ -73,6 +73,36 @@
    </p>
 </figure>
 
+## Возврат книг
+<figure>
+   <p align="center">Возврат книги в библиотеку</p>
+   <p align="center">
+      <img src="https://github.com/dr-number/prog-high-level-lang-DB-API-2.0/blob/main/for_read_me/4-return-ok.png">
+   </p>
+</figure>
+<figure>
+   <p align="center">Ошибка выдачи книги</p>
+   <p align="center">
+      <img src="https://github.com/dr-number/prog-high-level-lang-DB-API-2.0/blob/main/for_read_me/4-error-return_book.png">
+   </p>
+</figure>
+
+## Поиск книг
+<figure>
+   <p align="center">Поиск книг</p>
+   <p align="center">
+      <img src="https://github.com/dr-number/prog-high-level-lang-DB-API-2.0/blob/main/for_read_me/6-search.png">
+   </p>
+</figure>
+
+## Добавление нового пользователя
+<figure>
+   <p align="center">Поиск книг</p>
+   <p align="center">
+      <img src="https://github.com/dr-number/prog-high-level-lang-DB-API-2.0/blob/main/for_read_me/7-add-user.png">
+   </p>
+</figure>
+
 
 # Create venv:
     python3 -m venv venv
