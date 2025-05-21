@@ -197,13 +197,21 @@ def search_books(keyword):
     Используй LIKE и подстановку (%ключевое_слово%).
     """
     try:
-        # Приводим ключевое слово к нижнему регистру для поиска
-        search_pattern = f"%{keyword}%"
+        # Создаем регулярное выражение для нечувствительного к регистру поиска
+        regex_pattern = f"(?i){keyword}"
+        
+        # Включаем поддержку REGEXP в SQLite
+        def regexp(expr, item):
+            import re
+            return re.search(expr, item, re.IGNORECASE) is not None
+        
+        conn.create_function("REGEXP", 2, regexp)
+        
         cursor.execute('''SELECT id, title, author, year, 
                          CASE WHEN available THEN 'Доступна' ELSE 'Выдана' END as status 
                          FROM Books 
-                         WHERE LOWER(title) LIKE LOWER(?) OR LOWER(author) LIKE LOWER(?)''', 
-                      (search_pattern, search_pattern))
+                         WHERE title REGEXP ? OR author REGEXP ?''', 
+                      (regex_pattern, regex_pattern))
         books = cursor.fetchall()
         
         if not books:
@@ -218,7 +226,6 @@ def search_books(keyword):
             print("{:<5} {:<40} {:<25} {:<8} {:<10}".format(*book))
     except sqlite3.Error as e:
         print(f"❌ Ошибка при поиске книг: {e}")
-
 # 📌 Функция добавления нового пользователя
 def add_user(name, email):
     """
@@ -283,6 +290,7 @@ def main_menu():
             keyword = input("Введите слово для поиска: ")
             search_books(keyword)
         elif choice == '7':
+            show_users()
             name = input("Имя пользователя: ")
             email = input("Email пользователя: ")
             add_user(name, email)
