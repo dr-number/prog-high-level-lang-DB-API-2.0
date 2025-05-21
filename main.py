@@ -1,7 +1,3 @@
-# 📚 Шаблон для практического задания
-# Тема: Работа с базами данных в Python с использованием SQLite (DB API 2.0)
-# Задание: Реализовать простую библиотечную систему
-
 import sqlite3
 from datetime import date
 
@@ -15,7 +11,26 @@ def create_tables():
     Используй CREATE TABLE IF NOT EXISTS и укажи типы данных.
     Не забудь задать первичные ключи и связи (FOREIGN KEY).
     """
-    pass  # Напиши код создания таблиц здесь вместо pass
+    cursor.execute('''CREATE TABLE IF NOT EXISTS Books (
+                      id INTEGER PRIMARY KEY,
+                      title TEXT NOT NULL,
+                      author TEXT NOT NULL,
+                      year INTEGER,
+                      available BOOLEAN DEFAULT TRUE)''')
+    
+    cursor.execute('''CREATE TABLE IF NOT EXISTS Users (
+                      id INTEGER PRIMARY KEY,
+                      name TEXT NOT NULL,
+                      email TEXT UNIQUE NOT NULL)''')
+    
+    cursor.execute('''CREATE TABLE IF NOT EXISTS Borrowings (
+                      id INTEGER PRIMARY KEY,
+                      user_id INTEGER NOT NULL,
+                      book_id INTEGER NOT NULL,
+                      borrow_date DATE NOT NULL,
+                      FOREIGN KEY (user_id) REFERENCES Users(id),
+                      FOREIGN KEY (book_id) REFERENCES Books(id))''')
+    conn.commit()
 
 # 📌 Функция заполнения базы начальными данными
 def seed_data():
@@ -23,7 +38,24 @@ def seed_data():
     Вставь в таблицы Books и Users несколько строк с начальными данными.
     Используй executemany() и параметризованные запросы (?).
     """
-    pass  # Вставь книги и пользователей в таблицы здесь вместо pass
+    books_data = [
+        ('Война и мир', 'Лев Толстой', 1869, True),
+        ('Преступление и наказание', 'Федор Достоевский', 1866, True),
+        ('1984', 'Джордж Оруэлл', 1949, True),
+        ('Мастер и Маргарита', 'Михаил Булгаков', 1967, True),
+        ('Гарри Поттер и философский камень', 'Джоан Роулинг', 1997, True)
+    ]
+    
+    users_data = [
+        ('Иван Иванов', 'ivan@example.com'),
+        ('Петр Петров', 'petr@example.com'),
+        ('Сергей Сергеев', 'sergey@example.com')
+    ]
+    
+    cursor.executemany('INSERT INTO Books (title, author, year, available) VALUES (?, ?, ?, ?)', books_data)
+    cursor.executemany('INSERT INTO Users (name, email) VALUES (?, ?)', users_data)
+    conn.commit()
+    print("✅ Начальные данные успешно добавлены")
 
 # 📌 Функция выдачи книги
 def borrow_book(user_id, book_id):
@@ -32,7 +64,33 @@ def borrow_book(user_id, book_id):
     Если да — выдай её (обнови поле available в Books и создай запись в Borrowings).
     Обработай возможные ошибки (например, книга уже выдана).
     """
-    pass  # Реализуй выдачу книги здесь вместо pass
+    try:
+        # Проверяем существует ли пользователь
+        cursor.execute('SELECT id FROM Users WHERE id = ?', (user_id,))
+        if not cursor.fetchone():
+            print(f"❌ Пользователь с ID {user_id} не найден")
+            return
+        
+        # Проверяем доступность книги
+        cursor.execute('SELECT available FROM Books WHERE id = ?', (book_id,))
+        book = cursor.fetchone()
+        
+        if not book:
+            print(f"❌ Книга с ID {book_id} не найдена")
+            return
+            
+        if not book[0]:
+            print(f"❌ Книга с ID {book_id} уже выдана")
+            return
+            
+        # Выдаем книгу
+        cursor.execute('UPDATE Books SET available = FALSE WHERE id = ?', (book_id,))
+        cursor.execute('INSERT INTO Borrowings (user_id, book_id, borrow_date) VALUES (?, ?, ?)', 
+                      (user_id, book_id, date.today()))
+        conn.commit()
+        print(f"✅ Книга с ID {book_id} успешно выдана пользователю с ID {user_id}")
+    except sqlite3.Error as e:
+        print(f"❌ Ошибка при выдаче книги: {e}")
 
 # 📌 Функция возврата книги
 def return_book(book_id):
@@ -40,14 +98,50 @@ def return_book(book_id):
     Отметь книгу как доступную.
     Проверь, что она действительно была выдана.
     """
-    pass  # Реализуй возврат книги здесь вместо pass
+    try:
+        # Проверяем выдана ли книга
+        cursor.execute('SELECT available FROM Books WHERE id = ?', (book_id,))
+        book = cursor.fetchone()
+        
+        if not book:
+            print(f"❌ Книга с ID {book_id} не найдена")
+            return
+            
+        if book[0]:
+            print(f"❌ Книга с ID {book_id} уже доступна (не была выдана)")
+            return
+            
+        # Возвращаем книгу
+        cursor.execute('UPDATE Books SET available = TRUE WHERE id = ?', (book_id,))
+        cursor.execute('DELETE FROM Borrowings WHERE book_id = ?', (book_id,))
+        conn.commit()
+        print(f"✅ Книга с ID {book_id} успешно возвращена")
+    except sqlite3.Error as e:
+        print(f"❌ Ошибка при возврате книги: {e}")
 
 # 📌 Функция отображения всех книг
 def show_books():
     """
     Выведи список всех книг с их статусом: 'Доступна' или 'Выдана'.
     """
-    pass  # Реализуй вывод всех книг здесь вместо pass
+    try:
+        cursor.execute('''SELECT id, title, author, year, 
+                         CASE WHEN available THEN 'Доступна' ELSE 'Выдана' END as status 
+                         FROM Books''')
+        books = cursor.fetchall()
+        
+        if not books:
+            print("❌ В библиотеке нет книг")
+            return
+            
+        print("\n📚 Список всех книг:")
+        print("{:<5} {:<40} {:<25} {:<8} {:<10}".format(
+            "ID", "Название", "Автор", "Год", "Статус"))
+        print("-" * 90)
+        for book in books:
+            print("{:<5} {:<40} {:<25} {:<8} {:<10}".format(*book))
+    except sqlite3.Error as e:
+        print(f"❌ Ошибка при получении списка книг: {e}")
 
 # 📌 Функция показа книг, выданных конкретному пользователю
 def show_user_books(user_id):
@@ -55,7 +149,25 @@ def show_user_books(user_id):
     Выведи список книг, которые на руках у пользователя.
     Используй JOIN между Borrowings и Books.
     """
-    pass  # Реализуй поиск книг пользователя здесь вместо pass
+    try:
+        cursor.execute('''SELECT b.id, b.title, b.author, br.borrow_date 
+                         FROM Books b
+                         JOIN Borrowings br ON b.id = br.book_id
+                         WHERE br.user_id = ?''', (user_id,))
+        books = cursor.fetchall()
+        
+        if not books:
+            print(f"❌ У пользователя с ID {user_id} нет выданных книг")
+            return
+            
+        print(f"\n📚 Книги пользователя с ID {user_id}:")
+        print("{:<5} {:<40} {:<25} {:<12}".format(
+            "ID", "Название", "Автор", "Дата выдачи"))
+        print("-" * 85)
+        for book in books:
+            print("{:<5} {:<40} {:<25} {:<12}".format(*book))
+    except sqlite3.Error as e:
+        print(f"❌ Ошибка при получении списка книг пользователя: {e}")
 
 # 📌 Функция поиска книг по ключевому слову
 def search_books(keyword):
@@ -63,7 +175,27 @@ def search_books(keyword):
     Найди книги по названию или автору.
     Используй LIKE и подстановку (%ключевое_слово%).
     """
-    pass  # Реализуй поиск книг здесь вместо pass
+    try:
+        search_pattern = f"%{keyword}%"
+        cursor.execute('''SELECT id, title, author, year, 
+                         CASE WHEN available THEN 'Доступна' ELSE 'Выдана' END as status 
+                         FROM Books 
+                         WHERE title LIKE ? OR author LIKE ?''', 
+                      (search_pattern, search_pattern))
+        books = cursor.fetchall()
+        
+        if not books:
+            print(f"❌ Книги по запросу '{keyword}' не найдены")
+            return
+            
+        print(f"\n🔍 Результаты поиска по запросу '{keyword}':")
+        print("{:<5} {:<40} {:<25} {:<8} {:<10}".format(
+            "ID", "Название", "Автор", "Год", "Статус"))
+        print("-" * 90)
+        for book in books:
+            print("{:<5} {:<40} {:<25} {:<8} {:<10}".format(*book))
+    except sqlite3.Error as e:
+        print(f"❌ Ошибка при поиске книг: {e}")
 
 # 📌 Функция добавления нового пользователя
 def add_user(name, email):
@@ -71,7 +203,14 @@ def add_user(name, email):
     Вставь нового пользователя в таблицу Users.
     Обработай исключение, если email уже есть в базе.
     """
-    pass  # Реализуй добавление пользователя здесь вместо pass
+    try:
+        cursor.execute('INSERT INTO Users (name, email) VALUES (?, ?)', (name, email))
+        conn.commit()
+        print(f"✅ Пользователь {name} успешно добавлен")
+    except sqlite3.IntegrityError:
+        print(f"❌ Пользователь с email {email} уже существует")
+    except sqlite3.Error as e:
+        print(f"❌ Ошибка при добавлении пользователя: {e}")
 
 # 🧭 Главное меню приложения
 def main_menu():
