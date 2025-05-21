@@ -190,18 +190,19 @@ def show_user_books(user_id):
     except sqlite3.Error as e:
         print(f"❌ Ошибка при получении списка книг пользователя: {e}")
 
-# 📌 Функция поиска книг по ключевому слову
+# 📌 Функция поиска книг по ключевому слову (нечувствительна к регистру)
 def search_books(keyword):
     """
     Найди книги по названию или автору.
     Используй LIKE и подстановку (%ключевое_слово%).
     """
     try:
+        # Приводим ключевое слово к нижнему регистру для поиска
         search_pattern = f"%{keyword}%"
         cursor.execute('''SELECT id, title, author, year, 
                          CASE WHEN available THEN 'Доступна' ELSE 'Выдана' END as status 
                          FROM Books 
-                         WHERE title LIKE ? OR author LIKE ?''', 
+                         WHERE LOWER(title) LIKE LOWER(?) OR LOWER(author) LIKE LOWER(?)''', 
                       (search_pattern, search_pattern))
         books = cursor.fetchall()
         
@@ -267,6 +268,7 @@ def main_menu():
                 print("❌ Введите корректные числа.")
         elif choice == '4':
             try:
+                show_books()
                 book_id = int(input("ID книги для возврата: "))
                 return_book(book_id)
             except ValueError:
