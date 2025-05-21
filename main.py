@@ -41,9 +41,9 @@ def seed_data():
     books_data = [
         ('Война и мир', 'Лев Толстой', 1869, True),
         ('Преступление и наказание', 'Федор Достоевский', 1866, True),
-        ('1984', 'Джордж Оруэлл', 1949, True),
+        ('Продавец воздуха', 'Беляев', 1949, True),
         ('Мастер и Маргарита', 'Михаил Булгаков', 1967, True),
-        ('Гарри Поттер и философский камень', 'Джоан Роулинг', 1997, True)
+        ('Голова профессора Доуэля', 'Беляев', 1997, True)
     ]
     
     users_data = [
@@ -65,14 +65,12 @@ def borrow_book(user_id, book_id):
     Обработай возможные ошибки (например, книга уже выдана).
     """
     try:
-        # Проверяем существует ли пользователь
         cursor.execute('SELECT id FROM Users WHERE id = ?', (user_id,))
         if not cursor.fetchone():
             print(f"❌ Пользователь с ID {user_id} не найден")
             return
         
-        # Проверяем доступность книги
-        cursor.execute('SELECT available FROM Books WHERE id = ?', (book_id,))
+        cursor.execute('SELECT available FROM Books WHERE id = ? AND available = TRUE', (book_id,))
         book = cursor.fetchone()
         
         if not book:
@@ -83,7 +81,6 @@ def borrow_book(user_id, book_id):
             print(f"❌ Книга с ID {book_id} уже выдана")
             return
             
-        # Выдаем книгу
         cursor.execute('UPDATE Books SET available = FALSE WHERE id = ?', (book_id,))
         cursor.execute('INSERT INTO Borrowings (user_id, book_id, borrow_date) VALUES (?, ?, ?)', 
                       (user_id, book_id, date.today()))
@@ -99,8 +96,7 @@ def return_book(book_id):
     Проверь, что она действительно была выдана.
     """
     try:
-        # Проверяем выдана ли книга
-        cursor.execute('SELECT available FROM Books WHERE id = ?', (book_id,))
+        cursor.execute('SELECT available FROM Books WHERE id = ? AND available = FALSE', (book_id,))
         book = cursor.fetchone()
         
         if not book:
@@ -111,7 +107,6 @@ def return_book(book_id):
             print(f"❌ Книга с ID {book_id} уже доступна (не была выдана)")
             return
             
-        # Возвращаем книгу
         cursor.execute('UPDATE Books SET available = TRUE WHERE id = ?', (book_id,))
         cursor.execute('DELETE FROM Borrowings WHERE book_id = ?', (book_id,))
         conn.commit()
