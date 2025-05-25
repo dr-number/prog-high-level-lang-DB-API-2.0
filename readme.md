@@ -115,4 +115,8 @@
     source venv/bin/activate
 
 # start 
+## In macOS or Linux:
     ./venv/bin/python "main.py"
+
+## In Windows:
+   .\myenv\Scripts\python main.py
